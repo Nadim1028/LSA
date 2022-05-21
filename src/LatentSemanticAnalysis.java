@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import Tokenization.Tokenization;
 import edu.ucla.sspace.common.SemanticSpace;
 import edu.ucla.sspace.matrix.LogEntropyTransform;
 import edu.ucla.sspace.matrix.Matrices;
@@ -21,103 +22,35 @@ import edu.ucla.sspace.util.SparseArray;
 import edu.ucla.sspace.util.SparseIntHashArray;
 import edu.ucla.sspace.vector.DoubleVector;
 import edu.ucla.sspace.vector.Vector;
-import edu.ucla.sspace.clustering.Assignment;
-import edu.ucla.sspace.clustering.Assignments;
-import edu.ucla.sspace.clustering.Clustering;
-import edu.ucla.sspace.clustering.DirectClustering;
 
 public class LatentSemanticAnalysis implements SemanticSpace, Serializable {
 
     private static final long serialVersionUID = 220l;
-
-    /**
-     * The prefix for naming publically accessible properties
-     */
     private static final String PROPERTY_PREFIX =
             "edu.ucla.sspace.lsa.LatentSemanticAnalysis";
-
-
     public static final String MATRIX_TRANSFORM_PROPERTY =
             PROPERTY_PREFIX + ".transform";
-
-    /**
-     * The property to set the number of dimension to which the space should be
-     * reduced using the SVD
-     */
     public static final String LSA_DIMENSIONS_PROPERTY =
             PROPERTY_PREFIX + ".dimensions";
-
-    /**
-     * The property to set the specific SVD algorithm used by an instance during
-     * {@code processSpace}.  The value should be the name of a {@link
-     * edu.ucla.sspace.matrix.SVD.Algorithm}.  If this property is unset, any
-     * available algorithm will be used according to the ordering defined in
-     * {@link SVD}.
-     */
     public static final String LSA_SVD_ALGORITHM_PROPERTY =
             PROPERTY_PREFIX + ".svd.algorithm";
-
-
     private static final String LSA_SSPACE_NAME =
             "lsa-semantic-space";
-
-    /**
-     * The logger used to record all output
-     */
     private static final Logger LSA_LOGGER =
             Logger.getLogger(LatentSemanticAnalysis.class.getName());
-
-    /**
-     * A mapping from a word to the row index in the that word-document matrix
-     * that contains occurrence counts for that word.
-     */
     private final ConcurrentMap<String,Integer> termToIndex;
 
-    /**
-     * The counter for recording the current, largest word index in the
-     * word-document matrix.
-     */
     private final AtomicInteger termIndexCounter;
-
-    /**
-     * The builder used to construct the term-document matrix as new documents
-     * are processed.
-     */
     private final MatrixBuilder termDocumentMatrixBuilder;
-
-    /**
-     * The word space of the LSA model, which is the left factor matrix of the
-     * SVD of the word-document matrix.  This matrix is only available after the
-     * {@link #processSpace(Properties) processSpace} method has been called.
-     */
     private Matrix wordSpace;
-
-    /**
-     * The document space of the LSA model, which is the right factor matrix of
-     * the SVD of the word-document matrix.  This matrix is only available after
-     * the {@link #processSpace(Properties) processSpace} method has been
-     * called.
-     */
     private Matrix documentSpace;
 
-    /**
-     * Constructs the {@code LatentSemanticAnalysis} using the system properties
-     * for configuration.
-     *
-     * @throws IOException if this instance encounters any errors when creatng
-     *         the backing array files required for processing
-     */
+
     public LatentSemanticAnalysis() throws IOException {
         this(System.getProperties());
     }
 
-    /**
-     * Constructs the {@code LatentSemanticAnalysis} using the specified
-     * properties for configuration.
-     *
-     * @throws IOException if this instance encounters any errors when creatng
-     *         the backing array files required for processing
-     */
+
     public LatentSemanticAnalysis(Properties properties) throws IOException {
         termToIndex = new ConcurrentHashMap<String,Integer>();
         termIndexCounter = new AtomicInteger(0);
@@ -128,27 +61,64 @@ public class LatentSemanticAnalysis implements SemanticSpace, Serializable {
         documentSpace = null;
     }
 
-    public void readFile(){
-        try {
+    public Map<String, Integer> getTermsCounts(String filePath) throws IOException {
+        Tokenization tokenization = new Tokenization();
+        Collection<String> tokens = tokenization.tokenGenerator(filePath);
+        Map<String,Integer> termCounts = processDocument(tokens);
+        return termCounts;
+
+        /*try {
 
             BufferedReader br = null;
-            br = new BufferedReader(new FileReader("src/datafile.txt"));
+            br = new BufferedReader(new FileReader("src/data/uncommentedCode.txt"));
 
             processDocument(br);
             br.close();
         }
 
-        /*catch (FileNotFoundException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
-        }
-        */
+
         catch (IOException e) {
             e.printStackTrace();
         }
-
+        */
     }
 
+
+    public Map<String, Integer> processDocument(Collection<String> documentTokens) {
+
+        Map<String,Integer> termCounts = new HashMap<String,Integer>(1000);
+
+        for (String word : documentTokens) {
+            if (word.equals(IteratorFactory.EMPTY_TOKEN)) {
+                continue;
+            }
+
+            addTerm(word);
+            Integer termCount = termCounts.get(word);
+
+            // update the term count
+            termCounts.put(word, (termCount == null)
+                    ? 1
+                    : 1 + termCount.intValue());
+        }
+
+
+        if (termCounts.isEmpty()) {
+            return termCounts;
+        }
+
+        int totalNumberOfUniqueWords = termIndexCounter.get();
+
+        SparseArray<Integer> documentColumn =
+                new SparseIntHashArray(totalNumberOfUniqueWords);
+        for (Map.Entry<String,Integer> e : termCounts.entrySet()) {
+            documentColumn.set(termToIndex.get(e.getKey()), e.getValue());
+        }
+
+        termDocumentMatrixBuilder.addColumn(documentColumn);
+
+        return termCounts;
+    }
 
 
 
@@ -169,81 +139,8 @@ public class LatentSemanticAnalysis implements SemanticSpace, Serializable {
         processDocument(tokens);
     }
 
-    /**
-     * <p>Parses the document.</p>
-     * <p>This method is thread-safe and may be called in parallel with separate
-     * documents to speed up overall processing time.</p>
-     */
-    public void processDocument(Collection<String> documentTokens) {
-        // Create a mapping for each term that is seen in the document to the
-        // number of times it has been seen.  This mapping would more elegantly
-        // be a SparseArray<Integer> however, the length of the sparse array
-        // isn't known ahead of time, which prevents it being used by the
-        // MatrixBuilder.  Note that the SparseArray implementation would also
-        // incur an additional performance hit since each word would have to be
-        // converted to its index form for each occurrence, which results in a
-        // double Map look-up.
-        Map<String,Integer> termCounts = new HashMap<String,Integer>(1000);
-
-        // for each word in the text document, keep a count of how many times it
-        // has occurred
-        for (String word : documentTokens) {
-            // Skip added empty tokens for words that have been filtered out
-            if (word.equals(IteratorFactory.EMPTY_TOKEN)) {
-                continue;
-            }
-
-            // Add the term to the total list of terms to ensure it has a proper
-            // index.  If the term was already added, this method is a no-op
-            addTerm(word);
-            Integer termCount = termCounts.get(word);
-
-            // update the term count
-            termCounts.put(word, (termCount == null)
-                    ? 1
-                    : 1 + termCount.intValue());
-        }
-
-       /* for (int i=0; i<termCounts.size(); i++)
-        {
-            System.out.println(termCounts.);
-        }*/
-
-        System.out.println("******************************************************");
-        System.out.println(termCounts);
-        System.out.println("******************************************************");
 
 
-        System.out.println();
-
-        // Check that we actually loaded in some terms before we increase the
-        // documentIndex.  This could possibly save some dimensions in the final
-        // array for documents that were essentially blank.  If we didn't see
-        // any terms, just perform no updates.
-        if (termCounts.isEmpty()) {
-            return;
-        }
-
-        // Get the total number of terms encountered so far, including any new
-        // unique terms found in the most recent document
-        int totalNumberOfUniqueWords = termIndexCounter.get();
-
-        // Convert the Map count to a SparseArray
-        SparseArray<Integer> documentColumn =
-                new SparseIntHashArray(totalNumberOfUniqueWords);
-        for (Map.Entry<String,Integer> e : termCounts.entrySet()) {
-            documentColumn.set(termToIndex.get(e.getKey()), e.getValue());
-        }
-
-        // Update the term-document matrix with the results of processing the
-        // document.
-        termDocumentMatrixBuilder.addColumn(documentColumn);
-    }
-
-    /**
-     * Adds the term to the list of terms and gives it an index, or if the term
-     * has already been added, does nothing.
-     */
     private void addTerm(String term) {
         Integer index = termToIndex.get(term);
 
