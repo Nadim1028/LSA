@@ -43,11 +43,14 @@ public class LatentSemanticAnalysis implements SemanticSpace, Serializable {
     private final AtomicInteger termIndexCounter;
     private final MatrixBuilder termDocumentMatrixBuilder;
     private Matrix wordSpace;
-    private Matrix documentSpace;
+    public Matrix documentSpace;
+    private Properties properties;
 
 
     public LatentSemanticAnalysis() throws IOException {
         this(System.getProperties());
+        properties = System.getProperties();
+        //System.out.println("Properties ==================================== "+System.getProperties());
     }
 
 
@@ -121,7 +124,9 @@ public class LatentSemanticAnalysis implements SemanticSpace, Serializable {
     }
 
 
-
+    /**
+     This method is not used currently
+     */
     @Override
     public void processDocument(BufferedReader document)
             throws IOException
@@ -141,7 +146,7 @@ public class LatentSemanticAnalysis implements SemanticSpace, Serializable {
 
 
 
-    private void addTerm(String term) {
+    public void addTerm(String term) {
         Integer index = termToIndex.get(term);
 
         if (index == null) {

@@ -11,10 +11,15 @@ public class TestSimilarity
 {
     public static void main(String[] args) throws IOException
     {
-        String filePath1="src/Output/clean_data1.txt",filePath2="src/Output/clean_data1.txt";
+        String filePath1="src/Output/clean_data1.txt",filePath2="src/Output/clean_data2.txt";
         int[]  valueOfTerms1,valueOfTerms2;
         LatentSemanticAnalysis latentSemanticAnalysis = new LatentSemanticAnalysis();
         Map<String,Integer> termCounts1=latentSemanticAnalysis.getTermsCounts(filePath1);
+        Map<String,Integer> termCounts2=latentSemanticAnalysis.getTermsCounts(filePath2);
+        Map<String,Integer> termCounts3=latentSemanticAnalysis.getTermsCounts(filePath2);
+        Map<String,Integer> termCounts4=latentSemanticAnalysis.getTermsCounts(filePath1);
+
+        /*Map<String,Integer> termCounts1=latentSemanticAnalysis.getTermsCounts(filePath1);
         Map<String,Integer> termCounts2=latentSemanticAnalysis.getTermsCounts(filePath2);
 
         valueOfTerms1 = new int[termCounts1.size()];
@@ -33,13 +38,18 @@ public class TestSimilarity
         CosineAngleCalculator cosineAngleCalculator = new CosineAngleCalculator();
         double result = cosineAngleCalculator.getCosineSimilarity(valueOfTerms1,valueOfTerms2);
         printTermsValue(termCounts1,termCounts2);
-        System.out.println("Cosine Similarity = "+(result*100)+"%");
+        System.out.println("Cosine Similarity = "+(result*100)+"%");*/
 
 
         Set<String> str = latentSemanticAnalysis.getWords();
-        /*System.out.println("*******************Tokens****************************");
+        System.out.println("*******************Tokens****************************");
         System.out.println(str);
-        System.out.println("*****************************************************");*/
+        System.out.println("*****************************************************");
+
+        latentSemanticAnalysis.processSpace(System.getProperties());
+        System.out.println("Document Space ======= "+latentSemanticAnalysis.documentSpace.rows());
+        System.out.println("Vector  ============== "+latentSemanticAnalysis.getDocumentVector(3));
+
 
     }
 
