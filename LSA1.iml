@@ -7,20 +7,10 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://E:/DOWNLOADS/sspace-2.0.jar.zip!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-        <jarDirectory url="jar://E:/DOWNLOADS/sspace-2.0.jar.zip!/" recursive="false" />
-      </library>
-    </orderEntry>
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://E:/DOWNLOADS/jar_files/sspace-2.0.3.jar!/" />
+          <root url="jar://$MODULE_DIR$/../Library/jama-1.0.3.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -29,16 +19,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://E:/DOWNLOADS/Jama-1.0.1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
-          <root url="jar://E:/DOWNLOADS/lingpipe-3.5.0.jar/lingpipe-3.5.0.jar!/" />
+          <root url="jar://$MODULE_DIR$/../Library/sspace-2.0.4.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
