@@ -1,10 +1,6 @@
-import CosineSimilarity.CosineAngleCalculator;
-import Jama.Matrix;
+import Matrix.TfidfMatrixBuilder;
 import Matrix.TokenFinderInDocs;
-import edu.ucla.sspace.vector.DoubleVector;
-
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.*;
 
 public class TestSimilarity
@@ -17,6 +13,11 @@ public class TestSimilarity
         Map<String,Integer> termCounts1=latentSemanticAnalysis.getTermsCounts(filePath1);
         Map<String,Integer> termCounts2=latentSemanticAnalysis.getTermsCounts(filePath2);
         Map<String,Integer> termCounts3=latentSemanticAnalysis.getTermsCounts(filePath3);
+
+        ArrayList<Integer> totalWordsInEachDoc = new ArrayList<Integer>(), numOfDocsWithThisWord = new ArrayList<Integer>();
+        totalWordsInEachDoc.add(termCounts1.size());
+        totalWordsInEachDoc.add(termCounts2.size());
+        totalWordsInEachDoc.add(termCounts3.size());
 
 
         System.out.println("doc1 unique keyword size : "+termCounts1.size());
@@ -49,7 +50,7 @@ public class TestSimilarity
         System.out.println("Sorted :"+sortedList);
         System.out.println("CastInsensitiveUniqueTokensSize : "+caseInsensitiveTokenSet.size());
 
-        double[][] matrix = new double[sortedList.size()][3];
+        double[][] matrix = new double[sortedList.size()][3],tfidfMatrix = new double[sortedList.size()][3];
 
         for(int i=0;i<sortedList.size();i++){
             int wordFrequency1 = new TokenFinderInDocs(termCounts1,sortedList.get(i)).getTermFrequency();
@@ -59,15 +60,37 @@ public class TestSimilarity
             matrix[i][0] = wordFrequency1;
             matrix[i][1] = wordFrequency2;
             matrix[i][2] = wordFrequency3;
+            int count = 0;
+            if(wordFrequency1 > 0)
+                count++;
+            if(wordFrequency2 > 0)
+                count++;
+            if(wordFrequency3 > 0)
+                count++;
+            numOfDocsWithThisWord.add(count);
+
         }
-        System.out.println("d1   d2   d3");
+       /* System.out.println("d1   d2   d3");
         for (int i = 0; i < matrix.length; i++) {
             // Loop through all elements of current row
 
             for (int j = 0; j < matrix[i].length; j++)
                 System.out.print(matrix[i][j] + "   ");
-            System.out.println("<=== "+sortedList.get(i));
-        }
+            System.out.println("   "+numOfDocsWithThisWord.get(i)+" <=== "+sortedList.get(i));
+        }*/
+
+        TfidfMatrixBuilder tfidfMatrixBuilder = new TfidfMatrixBuilder(3,matrix,totalWordsInEachDoc,numOfDocsWithThisWord);
+        tfidfMatrix = tfidfMatrixBuilder.getTfidfMatrix();
+
+//        System.out.println("d1   d2   d3");
+//        for (int i = 0; i < tfidfMatrix.length; i++) {
+//            // Loop through all elements of current row
+//
+//            for (int j = 0; j < tfidfMatrix[i].length; j++)
+//                System.out.print(tfidfMatrix[i][j] + "   ");
+//            System.out.println();
+//        }
+
 
     }
 
