@@ -22,11 +22,9 @@ public class TfidfMatrixBuilder {
                                 double  tf = getTFValue(termFrequencyMatrix[i][j],totalWordsInEachDoc.get(j));
                                 double  idf  = getIDFValue(numOfDocsWithThisWord.get(i));
                                 tfidfMatrix[i][j] = Double.parseDouble(String.format("%.3f", tf*idf));
-                                System.out.print( tfidfMatrix[i][j]+"   ");
+                                //System.out.print( tfidfMatrix[i][j]+"   ");
                                // System.out.println("Multiplication = "+ tf*idf);
                         }
-
-                        System.out.println();
                 }
 
 

@@ -1,1 +1,24 @@
-string  uganda nigeria algeria africa africa africa africa africa africa uganda string
+ while (i < n1) {
+      array[k] = L[i];
+      i++;
+      k++;
+    }
+
+    while (j < n2) {
+      array[k] = M[j];
+      j++;
+      k++;
+    }
+  }
+
+  void mergeSort(int array[], int left, int right) {
+    if (left < right) {
+
+      int mid = (left + right) / 2;
+
+      mergeSort(array, left, mid);
+      mergeSort(array, mid + 1, right);
+
+      merge(array, left, mid, right);
+    }
+  }

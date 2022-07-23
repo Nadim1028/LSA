@@ -70,26 +70,22 @@ public class TestSimilarity
             numOfDocsWithThisWord.add(count);
 
         }
-       /* System.out.println("d1   d2   d3");
+        System.out.println("**********Term Frequency Matrix***********");
         for (int i = 0; i < matrix.length; i++) {
-            // Loop through all elements of current row
-
             for (int j = 0; j < matrix[i].length; j++)
                 System.out.print(matrix[i][j] + "   ");
             System.out.println("   "+numOfDocsWithThisWord.get(i)+" <=== "+sortedList.get(i));
-        }*/
+        }
 
         TfidfMatrixBuilder tfidfMatrixBuilder = new TfidfMatrixBuilder(3,matrix,totalWordsInEachDoc,numOfDocsWithThisWord);
         tfidfMatrix = tfidfMatrixBuilder.getTfidfMatrix();
 
-//        System.out.println("d1   d2   d3");
-//        for (int i = 0; i < tfidfMatrix.length; i++) {
-//            // Loop through all elements of current row
-//
-//            for (int j = 0; j < tfidfMatrix[i].length; j++)
-//                System.out.print(tfidfMatrix[i][j] + "   ");
-//            System.out.println();
-//        }
+        System.out.println("\n\n********TFIDF Matrix*********");
+        for (int i = 0; i < tfidfMatrix.length; i++) {
+            for (int j = 0; j < tfidfMatrix[i].length; j++)
+                System.out.print(tfidfMatrix[i][j] + "   ");
+            System.out.println();
+        }
 
 
     }
