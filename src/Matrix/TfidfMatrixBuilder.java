@@ -39,6 +39,6 @@ public class TfidfMatrixBuilder {
 
         public double getIDFValue(double numOfDocumentWithThisWord){
 
-                return Math.log(numOfDoc/numOfDocumentWithThisWord);
+                return Math.log10(numOfDoc/numOfDocumentWithThisWord);
         }
 }

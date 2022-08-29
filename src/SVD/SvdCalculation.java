@@ -1,39 +1,36 @@
 package SVD;
 
-
 import Jama.Matrix;
 import Jama.SingularValueDecomposition;
 
 public class SvdCalculation {
+
+    /*public double[][] getSVDMatrix(double[][] M){
+        Matrix A = new Matrix(M);
+        SingularValueDecomposition s = A.svd();
+    }*/
+
     public static void main(String[] args) {
 
-//        1, 0, 0, 1, 0, 0, 0, 0, 0
-//         101000000
-//         110000000
-//         0 1 1 0 1 0 0 0 0
-//         011200000
-//         010010000
-//         010010000
-//         001100000
-//         01000000 1
-//         00000111 0
-//         000000111
-//         000000011
-
         // create M-by-N matrix that doesn't have full rank
-        int  numberOfDigitAfterDecimalPoint = 2,col = 3;//row is the number of digit after decimal point
-      /*  Matrix A  = new Matrix(new double[][]
-                {{3,3,2}, {2,3,-2},{0,0,0}}
-                );*/
+        int  numberOfDigitAfterDecimalPoint = 2,col = 8;//col is used for padding between two matrix cell
+        /*Matrix A  = new Matrix(new double[][]
+                {{2,2,0,0},
+                {2,2,0,0},
+                {3,3,0,0},
+                {0,0,2,2},
+                {0,0,1,1},
+                {0,0,2,2}}
+        );*/
 
        /* Matrix A  = new Matrix(new double[][]
                 {{2,3}, {4,10}}
         );*/
 
-        /*Matrix A  = new Matrix(new double[][]
+       /* Matrix A  = new Matrix(new double[][]
                 {{1,1,1}, {-1,-3,-3},{2,4,4}}
         );*/
-        Matrix A = new Matrix(new double[][]{
+       /* Matrix A = new Matrix(new double[][]{
                 {1, 1, 1, 0, 0},
                 {2, 2, 2, 0, 0},
                 {1, 1, 1, 0, 0},
@@ -42,8 +39,9 @@ public class SvdCalculation {
                 {0, 0, 0, 3, 3},
                 {0, 0, 0, 1, 1}
         });
+        */
 
-              /*Matrix A = new Matrix(new double[][] {
+              Matrix A = new Matrix(new double[][] {
                 {1, 0, 0, 1, 0, 0, 0, 0, 0 },
                 {1, 0, 1, 0, 0, 0, 0, 0, 0 },
                 {1, 1, 0, 0, 0, 0, 0, 0, 0 },
@@ -56,7 +54,9 @@ public class SvdCalculation {
                 {0, 0, 0, 0, 0, 1, 1, 1, 0 },
                 {0, 0, 0, 0, 0, 0, 1, 1, 1 },
                 {0, 0, 0, 0, 0, 0, 0, 1, 1 }
-        });*/
+        });
+
+
 
        /* Matrix B = Matrix.random(5, 3);
         Matrix A = Matrix.random(col, row).times(B).times(B.transpose());*/
@@ -93,5 +93,23 @@ public class SvdCalculation {
         Matrix svalues = new Matrix(s.getSingularValues(), 1);
         svalues.print(col, numberOfDigitAfterDecimalPoint);
     }
-
 }
+/*
+Singular values:
+   5.8310   4.2426   0.0000   0.0000
+
+Matrix U:
+  -0.4851   0.0000  -0.4851   0.4851   0.2425   0.4851
+  -0.4851   0.0000   0.8416   0.1584   0.0792   0.1584
+  -0.7276   0.0000  -0.2377  -0.4290  -0.2145  -0.4290
+   0.0000  -0.6667   0.0000   0.5556  -0.2222  -0.4444
+   0.0000  -0.3333   0.0000  -0.2222   0.8889  -0.2222
+   0.0000  -0.6667   0.0000  -0.4444  -0.2222   0.5556
+
+Matrix V:
+  -0.7071   0.0000  -0.7071   0.0000
+  -0.7071   0.0000   0.7071   0.0000
+   0.0000  -0.7071   0.0000  -0.7071
+   0.0000  -0.7071   0.0000   0.7071
+
+* */

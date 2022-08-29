@@ -67,6 +67,7 @@ public class LatentSemanticAnalysis implements SemanticSpace, Serializable {
     public Map<String, Integer> getTermsCounts(String filePath) throws IOException {
         Tokenization tokenization = new Tokenization();
         Collection<String> tokens = tokenization.tokenGenerator(filePath);
+        System.out.println("Tokens of file = "+filePath+"->"+tokens);
         Map<String,Integer> termCounts = processDocument(tokens);
         return termCounts;
 

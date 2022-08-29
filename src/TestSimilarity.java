@@ -1,3 +1,5 @@
+import Jama.Matrix;
+import Jama.SingularValueDecomposition;
 import Matrix.TfidfMatrixBuilder;
 import Matrix.TokenFinderInDocs;
 import java.io.IOException;
@@ -7,8 +9,9 @@ public class TestSimilarity
 {
     public static void main(String[] args) throws IOException
     {
-        String filePath1="src/Output/clean_data1.txt",filePath2="src/Output/clean_data2.txt",filePath3="src/Output/nadim.txt";
+        String filePath1="src/Output/clean_data1.txt",filePath2="src/Output/clean_data2.txt",filePath3="src/Output/clean_data3.txt";
         int[]  valueOfTerms1,valueOfTerms2;
+        int numberOfDigitAfterDecimalPoint = 2,spaceRange=10;
         LatentSemanticAnalysis latentSemanticAnalysis = new LatentSemanticAnalysis();
         Map<String,Integer> termCounts1=latentSemanticAnalysis.getTermsCounts(filePath1);
         Map<String,Integer> termCounts2=latentSemanticAnalysis.getTermsCounts(filePath2);
@@ -40,7 +43,6 @@ public class TestSimilarity
         Set<String> caseInsensitiveTokenSet= new HashSet<>();
         for(String token : str){
             String lowerCaseString = token.toLowerCase();
-            //System.out.println(lowerCaseString);
             caseInsensitiveTokenSet.add(lowerCaseString);
         }
 
@@ -70,23 +72,40 @@ public class TestSimilarity
             numOfDocsWithThisWord.add(count);
 
         }
-        System.out.println("**********Term Frequency Matrix***********");
+       System.out.println("**********Term Frequency Matrix***********");
         for (int i = 0; i < matrix.length; i++) {
+            System.out.print((i+1)+". "+sortedList.get(i)+" => ");
             for (int j = 0; j < matrix[i].length; j++)
                 System.out.print(matrix[i][j] + "   ");
-            System.out.println("   "+numOfDocsWithThisWord.get(i)+" <=== "+sortedList.get(i));
+            System.out.println();
+            //System.out.println("   "+numOfDocsWithThisWord.get(i));
         }
-
         TfidfMatrixBuilder tfidfMatrixBuilder = new TfidfMatrixBuilder(3,matrix,totalWordsInEachDoc,numOfDocsWithThisWord);
         tfidfMatrix = tfidfMatrixBuilder.getTfidfMatrix();
 
         System.out.println("\n\n********TFIDF Matrix*********");
         for (int i = 0; i < tfidfMatrix.length; i++) {
+            System.out.print((i+1)+". "+sortedList.get(i)+" => ");
             for (int j = 0; j < tfidfMatrix[i].length; j++)
                 System.out.print(tfidfMatrix[i][j] + "   ");
             System.out.println();
         }
 
+        System.out.println("\n\n************SVD MATRIX***********");
+        Matrix A = new Matrix(tfidfMatrix);
+        SingularValueDecomposition s = A.svd();
+
+        System.out.print("U = ");
+        Matrix U = s.getU();
+        U.print(spaceRange, numberOfDigitAfterDecimalPoint);
+
+        System.out.print("Sigma = ");
+        Matrix S = s.getS();
+        S.print(spaceRange, numberOfDigitAfterDecimalPoint);
+
+        System.out.print("V = ");
+        Matrix V = s.getV();
+        V.print(spaceRange, numberOfDigitAfterDecimalPoint);
 
     }
 
