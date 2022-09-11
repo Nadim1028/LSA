@@ -1,3 +1,4 @@
+import CosineSimilarity.CosineAngleCalculator;
 import Jama.Matrix;
 import Jama.SingularValueDecomposition;
 import Matrix.TfidfMatrixBuilder;
@@ -107,10 +108,55 @@ public class TestSimilarity
         Matrix V = s.getV();
         V.print(spaceRange, numberOfDigitAfterDecimalPoint);
 
+        Matrix X = new Matrix(U.getColumnDimension(),U.getColumnDimension());
+        X = U.copy();
+        double[][] C = X.getArray();
+        ArrayList<Integer> col1Terms = new ArrayList<>(),col2Terms = new ArrayList<>();
+        System.out.println("U with positive value : ");
+        for(int i=0;i<U.getRowDimension();i++){
+            for (int j =0;j<U.getColumnDimension();j++){
+                if(C[i][j]<=0)
+                    C[i][j] = -1* C[i][j];
+                C[i][j] = Double.parseDouble(String.format("%.2f",C[i][j]));
+                if(C[i][j]< 0.001)
+                    C[i][j] = 0;
+
+                System.out.print(C[i][j]+"         ");
+            }
+
+            if( C[i][0] != 0)
+                col1Terms.add(i);
+            if(C[i][1] !=0)
+                col2Terms.add(i);
+            System.out.println();
+        }
+
+      /*  System.out.println("Col1 array number : = ");
+        for (int i=0;i<col2Terms.size();i++){
+            System.out.println("value = " + col2Terms.get(i) );
+        }*/
+        int[] vectorA = new int[col2Terms.size()], vectorB =  new int[col2Terms.size()];
+
+        for (int i=0;i<col2Terms.size();i++){
+            vectorA[i] = (int) matrix[i][1];
+            vectorB[i] = (int) matrix[i][2];
+            System.out.println(sortedList.get(col2Terms.get(i)));
+        }
+
+
+        CosineAngleCalculator cosineAngleCalculator = new CosineAngleCalculator();
+
+        System.out.println("Cosine Similarity = "+(cosineAngleCalculator.getCosineSimilarity(vectorA,vectorB)*100)+"%");
     }
 
+}
 
-     /*Map<String,Integer> termCounts1=latentSemanticAnalysis.getTermsCounts(filePath1);
+
+
+
+
+
+ /*Map<String,Integer> termCounts1=latentSemanticAnalysis.getTermsCounts(filePath1);
         Map<String,Integer> termCounts2=latentSemanticAnalysis.getTermsCounts(filePath2);
 
         valueOfTerms1 = new int[termCounts1.size()];
@@ -131,8 +177,7 @@ public class TestSimilarity
         printTermsValue(termCounts1,termCounts2);
         System.out.println("Cosine Similarity = "+(result*100)+"%");*/
 
-
-    public static void printTermsValue( Map<String,Integer> termCounts1, Map<String,Integer> termCounts2){
+/*public static void printTermsValue( Map<String,Integer> termCounts1, Map<String,Integer> termCounts2){
         System.out.println("*************FirstDocument**************");
         for (Map.Entry<String, Integer> term :
                 termCounts1.entrySet()) {
@@ -149,5 +194,4 @@ public class TestSimilarity
             System.out.println(term.getValue());
         }
 
-    }
-}
+    }*/
