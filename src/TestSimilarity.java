@@ -139,19 +139,20 @@ public class TestSimilarity
             System.out.println("value = " + col2Terms.get(i) );
         }*/
 
-        ArrayList<Integer> mergedTerms = getMergedTokensOfDocumentsPair(col2Terms,col3Terms);
+        ArrayList<Integer> mergedTerms = getMergedTokensOfDocumentsPair(col1Terms,col2Terms);
         System.out.println("Merged Terms = "+mergedTerms);
         int[] vectorA = new int[mergedTerms.size()], vectorB =  new int[mergedTerms.size()];
 
         for (int i=0;i<mergedTerms.size();i++){
-            vectorA[i] = (int) matrix[i][1];
-            vectorB[i] = (int) matrix[i][2];
+            vectorA[i] = (int) matrix[i][0];
+            vectorB[i] = (int) matrix[i][1];
             System.out.println(sortedList.get(mergedTerms.get(i)) + "; A = "+ vectorA[i] + "; B = " +  vectorB[i]);
         }
 
         CosineAngleCalculator cosineAngleCalculator = new CosineAngleCalculator();
 
-        System.out.println("Cosine Similarity = "+(cosineAngleCalculator.getCosineSimilarity(vectorA,vectorB)*100)+"%");
+        double similarityRate = Double.parseDouble(String.format("%.2f",cosineAngleCalculator.getCosineSimilarity(vectorA,vectorB)*100));
+        System.out.println("Cosine Similarity = "+similarityRate+"%");
 
     }
 
