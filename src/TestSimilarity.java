@@ -108,11 +108,12 @@ public class TestSimilarity
         Matrix V = s.getV();
         V.print(spaceRange, numberOfDigitAfterDecimalPoint);
 
-        Matrix X = new Matrix(U.getColumnDimension(),U.getColumnDimension());
-        X = U.copy();
-        double[][] C = X.getArray();
-        ArrayList<Integer> col1Terms = new ArrayList<>(),col2Terms = new ArrayList<>();
+        /*Matrix X = new Matrix(U.getColumnDimension(),U.getColumnDimension());
+        X = U.copy();*/
+        double[][] C =  U.copy().getArray();
+        ArrayList<Integer> col1Terms = new ArrayList<>(),col2Terms = new ArrayList<>(), col3Terms = new ArrayList<>();
         System.out.println("U with positive value : ");
+
         for(int i=0;i<U.getRowDimension();i++){
             for (int j =0;j<U.getColumnDimension();j++){
                 if(C[i][j]<=0)
@@ -128,6 +129,8 @@ public class TestSimilarity
                 col1Terms.add(i);
             if(C[i][1] !=0)
                 col2Terms.add(i);
+            if(C[i][2] !=0)
+                col3Terms.add(i);
             System.out.println();
         }
 
@@ -135,18 +138,36 @@ public class TestSimilarity
         for (int i=0;i<col2Terms.size();i++){
             System.out.println("value = " + col2Terms.get(i) );
         }*/
-        int[] vectorA = new int[col2Terms.size()], vectorB =  new int[col2Terms.size()];
 
-        for (int i=0;i<col2Terms.size();i++){
+        ArrayList<Integer> mergedTerms = getMergedTokensOfDocumentsPair(col2Terms,col3Terms);
+        System.out.println("Merged Terms = "+mergedTerms);
+        int[] vectorA = new int[mergedTerms.size()], vectorB =  new int[mergedTerms.size()];
+
+        for (int i=0;i<mergedTerms.size();i++){
             vectorA[i] = (int) matrix[i][1];
             vectorB[i] = (int) matrix[i][2];
-            System.out.println(sortedList.get(col2Terms.get(i)));
+            System.out.println(sortedList.get(mergedTerms.get(i)) + "; A = "+ vectorA[i] + "; B = " +  vectorB[i]);
         }
-
 
         CosineAngleCalculator cosineAngleCalculator = new CosineAngleCalculator();
 
         System.out.println("Cosine Similarity = "+(cosineAngleCalculator.getCosineSimilarity(vectorA,vectorB)*100)+"%");
+
+    }
+
+    public static ArrayList<Integer> getMergedTokensOfDocumentsPair(ArrayList<Integer> col1Terms,  ArrayList<Integer> col2Terms){
+        col1Terms.addAll(col2Terms);
+        Collections.sort(col1Terms);
+        //System.out.println(col1Terms);
+
+        Set<Integer> mergedTokens= new HashSet<>();
+        for (Integer tokensIndex:col1Terms) {
+            mergedTokens.add(tokensIndex);
+        }
+
+        //System.out.println("Set of Indexes = "+mergedTokens);
+
+        return new ArrayList<>(mergedTokens);
     }
 
 }
