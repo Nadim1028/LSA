@@ -67,21 +67,21 @@ public class SvdCalculation {
         System.out.print("A = "  );
         A.print(col,numberOfDigitAfterDecimalPoint);
 
-        // compute the singular vallue decomposition
+        // compute the singular value decomposition
         System.out.println("A = U S V^T");
         System.out.println();
         SingularValueDecomposition s = A.svd();
 
-        System.out.print("U = ");
+        System.out.print("U = ");//Term Feature Matrix
         Matrix U = s.getU();
         U.print(col, numberOfDigitAfterDecimalPoint);
 
         System.out.print("Sigma = ");
-        Matrix S = s.getS();
+        Matrix S = s.getS();// relative strengths of the features
         S.print(col, numberOfDigitAfterDecimalPoint);
 
         System.out.print("V = ");
-        Matrix V = s.getV();
+        Matrix V = s.getV();// documents feature matrix
         V.print(col, numberOfDigitAfterDecimalPoint);
 
         System.out.println("rank = " + s.rank());

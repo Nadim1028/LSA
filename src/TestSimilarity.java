@@ -53,16 +53,16 @@ public class TestSimilarity
         System.out.println("Sorted :"+sortedList);
         System.out.println("CastInsensitiveUniqueTokensSize : "+caseInsensitiveTokenSet.size());
 
-        double[][] matrix = new double[sortedList.size()][3],tfidfMatrix = new double[sortedList.size()][3];
+        double[][] termDocumentMatrix = new double[sortedList.size()][3],tfidfMatrix;
 
         for(int i=0;i<sortedList.size();i++){
             int wordFrequency1 = new TokenFinderInDocs(termCounts1,sortedList.get(i)).getTermFrequency();
             int wordFrequency2 = new TokenFinderInDocs(termCounts2,sortedList.get(i)).getTermFrequency();
             int wordFrequency3 = new TokenFinderInDocs(termCounts3,sortedList.get(i)).getTermFrequency();
             //System.out.println(sortedList.get(i) + ":" + "d1="+wordFrequency1+",d2="+wordFrequency2 + ",d3="+wordFrequency3);
-            matrix[i][0] = wordFrequency1;
-            matrix[i][1] = wordFrequency2;
-            matrix[i][2] = wordFrequency3;
+            termDocumentMatrix[i][0] = wordFrequency1;
+            termDocumentMatrix[i][1] = wordFrequency2;
+            termDocumentMatrix[i][2] = wordFrequency3;
             int count = 0;
             if(wordFrequency1 > 0)
                 count++;
@@ -73,15 +73,15 @@ public class TestSimilarity
             numOfDocsWithThisWord.add(count);
 
         }
-       System.out.println("**********Term Frequency Matrix***********");
-        for (int i = 0; i < matrix.length; i++) {
+       System.out.println("**********Term Document Matrix***********");
+        for (int i = 0; i < termDocumentMatrix.length; i++) {
             System.out.print((i+1)+". "+sortedList.get(i)+" => ");
-            for (int j = 0; j < matrix[i].length; j++)
-                System.out.print(matrix[i][j] + "   ");
+            for (int j = 0; j < termDocumentMatrix[i].length; j++)
+                System.out.print(termDocumentMatrix[i][j] + "   ");
             System.out.println();
             //System.out.println("   "+numOfDocsWithThisWord.get(i));
         }
-        TfidfMatrixBuilder tfidfMatrixBuilder = new TfidfMatrixBuilder(3,matrix,totalWordsInEachDoc,numOfDocsWithThisWord);
+        TfidfMatrixBuilder tfidfMatrixBuilder = new TfidfMatrixBuilder(3,termDocumentMatrix,totalWordsInEachDoc,numOfDocsWithThisWord);
         tfidfMatrix = tfidfMatrixBuilder.getTfidfMatrix();
 
         System.out.println("\n\n********TFIDF Matrix*********");
@@ -108,58 +108,100 @@ public class TestSimilarity
         Matrix V = s.getV();
         V.print(spaceRange, numberOfDigitAfterDecimalPoint);
 
-        /*Matrix X = new Matrix(U.getColumnDimension(),U.getColumnDimension());
-        X = U.copy();*/
-        double[][] C =  U.copy().getArray();
-        ArrayList<Integer> col1Terms = new ArrayList<>(),col2Terms = new ArrayList<>(), col3Terms = new ArrayList<>();
-        System.out.println("U with positive value : ");
+        double[][] documentFeatureMatrix = V.copy().getArray();
+        double[][] transposeV = V.transpose().copy().getArray();
+        double[][] termFeatureMatrix =  U.copy().getArray();
+        double[] singularValues = s.getSingularValues();
 
-        for(int i=0;i<U.getRowDimension();i++){
-            for (int j =0;j<U.getColumnDimension();j++){
-                if(C[i][j]<=0)
-                    C[i][j] = -1* C[i][j];
-                C[i][j] = Double.parseDouble(String.format("%.2f",C[i][j]));
-                if(C[i][j]< 0.001)
-                    C[i][j] = 0;
 
-                System.out.print(C[i][j]+"         ");
-            }
 
-            if( C[i][0] != 0)
-                col1Terms.add(i);
-            if(C[i][1] !=0)
-                col2Terms.add(i);
-            if(C[i][2] !=0)
-                col3Terms.add(i);
-            System.out.println();
-        }
+        ArrayList<ArrayList<Integer>> termWiseFeaturesColumns = getAllFeaturesValue(termFeatureMatrix);
+        ArrayList<ArrayList<Integer>> documentsWiseFeaturesColumns = getAllFeaturesValue(transposeV);
+        ArrayList<Integer> strongFeatures = getEligibleFeatures(singularValues);
+        System.out.println("Strong Features = "+strongFeatures);
+        System.out.println("FeatureList Under a document  = "+documentsWiseFeaturesColumns);
 
-      /*  System.out.println("Col1 array number : = ");
-        for (int i=0;i<col2Terms.size();i++){
-            System.out.println("value = " + col2Terms.get(i) );
-        }*/
 
-        ArrayList<Integer> mergedTerms = getMergedTokensOfDocumentsPair(col1Terms,col2Terms);
+
+        System.out.println("Enter the documents numbers to compare.");
+        Scanner sc= new Scanner(System.in);
+        int input1,input2;
+        input1= sc.nextInt();
+        input2= sc.nextInt();
+        ArrayList<Integer> tokensForDoc1 = getTokensForEachDocuments(documentsWiseFeaturesColumns.get(input1-1),strongFeatures,termWiseFeaturesColumns);
+        ArrayList<Integer> tokensForDoc2 = getTokensForEachDocuments(documentsWiseFeaturesColumns.get(input2-1),strongFeatures,termWiseFeaturesColumns);
+
+        ArrayList<Integer> mergedTerms = getMergedTokensOfDocumentsPair(tokensForDoc1,tokensForDoc2);
         System.out.println("Merged Terms = "+mergedTerms);
-        int[] vectorA = new int[mergedTerms.size()], vectorB =  new int[mergedTerms.size()];
 
-        for (int i=0;i<mergedTerms.size();i++){
-            vectorA[i] = (int) matrix[i][0];
-            vectorB[i] = (int) matrix[i][1];
-            System.out.println(sortedList.get(mergedTerms.get(i)) + "; A = "+ vectorA[i] + "; B = " +  vectorB[i]);
-        }
+        double similarityRate = getSimilarityPercentage(mergedTerms,termDocumentMatrix,sortedList,input1,input2);
 
-        CosineAngleCalculator cosineAngleCalculator = new CosineAngleCalculator();
-
-        double similarityRate = Double.parseDouble(String.format("%.2f",cosineAngleCalculator.getCosineSimilarity(vectorA,vectorB)*100));
         System.out.println("Cosine Similarity = "+similarityRate+"%");
 
+    }
+
+    public static ArrayList<Integer> getTokensForEachDocuments(ArrayList<Integer> features, ArrayList<Integer> strongFeatures, ArrayList<ArrayList<Integer>> termWiseFeaturesColumns ){
+        System.out.println("StrongFeaturesListInThisDoc = "+features);
+        ArrayList<Integer> termsIndex = new ArrayList<>();
+        for(int i=0;i<features.size();i++){
+            if(strongFeatures.contains(features.get(i))){
+                //System.out.println("Strong Feature in this doc = "+features.get(i));
+                termsIndex.addAll(termWiseFeaturesColumns.get(features.get(i)));
+            }
+        }
+
+        System.out.println("Terms = "+termsIndex);
+
+        return termsIndex;
+
+    }
+
+    public static ArrayList<Integer> getEligibleFeatures(double[] singularValues){
+        ArrayList<Integer> strongFeatures = new ArrayList<>();
+        for(int i=0;i<singularValues.length;i++)
+        {
+            double value = Double.parseDouble(String.format("%.2f",singularValues[i]));
+
+            if( value >= 0.1)
+            {
+                strongFeatures.add(i);
+            }
+        }
+        return  strongFeatures;
+    }
+
+    public static ArrayList<ArrayList<Integer>> getAllFeaturesValue(double[][] matrix){
+
+        ArrayList<ArrayList<Integer>> columns = new ArrayList<>();
+        for (int i=0;i<matrix[0].length;i++){
+            columns.add(new ArrayList<>());
+        }
+
+
+        for(int i=0;i<matrix.length;i++){
+            for (int j =0;j<matrix[i].length;j++){
+                if(matrix[i][j]<=0)
+                    matrix[i][j] = -1* matrix[i][j];
+                matrix[i][j] = Double.parseDouble(String.format("%.2f",matrix[i][j]));
+                if(matrix[i][j]< 0.001)
+                    matrix[i][j] = 0;
+
+
+                if(matrix[i][j] !=0)
+                    columns.get(j).add(i);
+
+               // System.out.print(matrix[i][j]+"         ");
+            }
+
+            //System.out.println();
+        }
+        return columns;
     }
 
     public static ArrayList<Integer> getMergedTokensOfDocumentsPair(ArrayList<Integer> col1Terms,  ArrayList<Integer> col2Terms){
         col1Terms.addAll(col2Terms);
         Collections.sort(col1Terms);
-        //System.out.println(col1Terms);
+        System.out.println("After Sorting " +col1Terms);
 
         Set<Integer> mergedTokens= new HashSet<>();
         for (Integer tokensIndex:col1Terms) {
@@ -171,7 +213,34 @@ public class TestSimilarity
         return new ArrayList<>(mergedTokens);
     }
 
+    public static double getSimilarityPercentage(ArrayList<Integer> mergedTerms, double[][] termDocumentMatrix , List<String> sortedList,int input1,int input2){
+        int[] vectorA = new int[mergedTerms.size()], vectorB =  new int[mergedTerms.size()];
+
+        for (int i=0;i<mergedTerms.size();i++){
+            vectorA[i] = (int) termDocumentMatrix[mergedTerms.get(i)][input1-1];
+            vectorB[i] = (int) termDocumentMatrix[mergedTerms.get(i)][input2-1];
+            System.out.println(sortedList.get( (mergedTerms.get(i))) + "; A = "+ vectorA[i] + "; B = " +  vectorB[i]);
+        }
+
+        CosineAngleCalculator cosineAngleCalculator = new CosineAngleCalculator();
+
+        double similarityRate = Double.parseDouble(String.format("%.2f",cosineAngleCalculator.getCosineSimilarity(vectorA,vectorB)*100));
+        return similarityRate;
+    }
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

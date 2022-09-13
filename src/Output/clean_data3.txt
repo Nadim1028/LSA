@@ -35,3 +35,18 @@ void insert(int data) {
       }
    }
 }
+
+ Node insertKey(Node root, int key) {
+    if (root == null) {
+      root = new Node(key);
+      return root;
+    }
+
+    if (key < root.key)
+      root.left = insertKey(root.left, key);
+    else if (key > root.key)
+      root.right = insertKey(root.right, key);
+
+    return root;
+  }
+
