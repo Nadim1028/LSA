@@ -116,27 +116,28 @@ public class TestSimilarity
 
 
         ArrayList<ArrayList<Integer>> termWiseFeaturesColumns = getAllFeaturesValue(termFeatureMatrix);
+        System.out.println("Features : "+termWiseFeaturesColumns);
         ArrayList<ArrayList<Integer>> documentsWiseFeaturesColumns = getAllFeaturesValue(transposeV);
         ArrayList<Integer> strongFeatures = getEligibleFeatures(singularValues);
         System.out.println("Strong Features = "+strongFeatures);
-        System.out.println("FeatureList Under a document  = "+documentsWiseFeaturesColumns);
+        //System.out.println("FeatureList Under a document  = "+documentsWiseFeaturesColumns);
 
 
 
-        System.out.println("Enter the documents numbers to compare.");
+        /*System.out.println("Enter the documents numbers to compare.");
         Scanner sc= new Scanner(System.in);
         int input1,input2;
         input1= sc.nextInt();
-        input2= sc.nextInt();
-        ArrayList<Integer> tokensForDoc1 = getTokensForEachDocuments(documentsWiseFeaturesColumns.get(input1-1),strongFeatures,termWiseFeaturesColumns);
-        ArrayList<Integer> tokensForDoc2 = getTokensForEachDocuments(documentsWiseFeaturesColumns.get(input2-1),strongFeatures,termWiseFeaturesColumns);
+        input2= sc.nextInt();*/
+        //ArrayList<Integer> tokensForDoc1 = getTokensForEachDocuments(documentsWiseFeaturesColumns.get(input1-1),strongFeatures,termWiseFeaturesColumns);
+        //ArrayList<Integer> tokensForDoc2 = getTokensForEachDocuments(documentsWiseFeaturesColumns.get(input2-1),strongFeatures,termWiseFeaturesColumns);
 
-        ArrayList<Integer> mergedTerms = getMergedTokensOfDocumentsPair(tokensForDoc1,tokensForDoc2);
-        System.out.println("Merged Terms = "+mergedTerms);
+        //ArrayList<Integer> mergedTerms = getMergedTokensOfDocumentsPair(tokensForDoc1,tokensForDoc2);
+        //System.out.println("Merged Terms = "+mergedTerms);
 
-        double similarityRate = getSimilarityPercentage(mergedTerms,termDocumentMatrix,sortedList,input1,input2);
-
-        System.out.println("Cosine Similarity = "+similarityRate+"%");
+//        double similarityRate = getSimilarityPercentage(mergedTerms,termDocumentMatrix,sortedList,input1,input2);
+//
+//        System.out.println("Cosine Similarity = "+similarityRate+"%");
 
     }
 
@@ -164,7 +165,7 @@ public class TestSimilarity
 
             if( value >= 0.1)
             {
-                strongFeatures.add(i);
+                strongFeatures.add(i+1);
             }
         }
         return  strongFeatures;
