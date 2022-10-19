@@ -1,14 +1,13 @@
- Node insertKey(Node root, int key) {
-    if (root == null) {
-      root = new Node(key);
-      return root;
+public class Math1 {
+    public static void main(String[] args) {
+        int n1, n2;
+        n1=1;
+        n2=5;
+
+        int n3 = printSum(n1,n2);
+        System.out.println(n3);
     }
-
-    if (key < root.key)
-      root.left = insertKey(root.left, key);
-    else if (key > root.key)
-      root.right = insertKey(root.right, key);
-
-    return root;
-  }
-
+    public static int printSum(int n1, int n2){
+        return n1+n2;
+    }
+}

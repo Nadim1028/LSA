@@ -51,8 +51,8 @@ public class Tokenization {
 
     public boolean isValidTokens(String str){
 
-        String[] inValidTokens = new String[] { "include", "iostream", "using", "namespace", "std"
-                ,"import","java","util","io","cout","cin",""
+        String[] inValidTokens = new String[] { "include", "iostream", "public", "static","main","class","args", "using", "namespace", "std"
+                ,"import","java","util","io","cout","cin","System","out","println","console","writeline"
         };
 
         boolean result = true;
@@ -60,7 +60,7 @@ public class Tokenization {
         for(String token :inValidTokens){
 
             int firstCharAscii = str.charAt(0);
-            if (token.equals(str) || str.length()<2 || isNumericValue(firstCharAscii)) {
+            if (token.equals(str) || str.length()<1 || isNumericValue(firstCharAscii)) {
                 result = false;
                 break;
             }
